@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.jpg">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"remove","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"fadeIn","post_body":"fadeIn","coll_header":"fadeIn","sidebar":"whirlIn"}}};
+  </script>
+
+  <meta name="description" content="nginx的作用 反向代理 动静分离 负载均衡  安装方法 yum install nginx  开机自启 修改&#x2F;etc&#x2F;rc.d&#x2F;rc.local,增加nginx的启动命令，给&#x2F;etc&#x2F;rc.d&#x2F;rc.local授权，chmod +x &#x2F;etc&#x2F;rc.d&#x2F;rc.local  master-workers的机制的好处 首先，对于每个worker进程来说，独立的进程，不需要加锁，所以省掉了锁带来的开">
+<meta property="og:type" content="article">
+<meta property="og:title" content="nginx">
+<meta property="og:url" content="http://yoursite.com/2020/04/06/nginx/index.html">
+<meta property="og:site_name" content="石玉龙的博客">
+<meta property="og:description" content="nginx的作用 反向代理 动静分离 负载均衡  安装方法 yum install nginx  开机自启 修改&#x2F;etc&#x2F;rc.d&#x2F;rc.local,增加nginx的启动命令，给&#x2F;etc&#x2F;rc.d&#x2F;rc.local授权，chmod +x &#x2F;etc&#x2F;rc.d&#x2F;rc.local  master-workers的机制的好处 首先，对于每个worker进程来说，独立的进程，不需要加锁，所以省掉了锁带来的开">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-04-06T06:35:51.377Z">
+<meta property="article:modified_time" content="2020-04-06T06:35:51.377Z">
+<meta property="article:author" content="石玉龙">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://yoursite.com/2020/04/06/nginx/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>nginx | 石玉龙的博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">石玉龙的博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archive/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-fw fa-heartbeat"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/06/nginx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="石玉龙">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="石玉龙的博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          nginx
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-06 14:35:51" itemprop="dateCreated datePublished" datetime="2020-04-06T14:35:51+08:00">2020-04-06</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="nginx的作用"><a href="#nginx的作用" class="headerlink" title="nginx的作用"></a>nginx的作用</h2><ol>
+<li>反向代理</li>
+<li>动静分离</li>
+<li>负载均衡</li>
+</ol>
+<h2 id="安装方法"><a href="#安装方法" class="headerlink" title="安装方法"></a>安装方法</h2><blockquote>
+<p>yum install nginx</p>
+</blockquote>
+<h2 id="开机自启"><a href="#开机自启" class="headerlink" title="开机自启"></a>开机自启</h2><blockquote>
+<p>修改/etc/rc.d/rc.local,增加nginx的启动命令，给/etc/rc.d/rc.local授权，chmod +x /etc/rc.d/rc.local</p>
+</blockquote>
+<h2 id="master-workers的机制的好处"><a href="#master-workers的机制的好处" class="headerlink" title="master-workers的机制的好处"></a>master-workers的机制的好处</h2><blockquote>
+<p>首先，对于每个worker进程来说，独立的进程，不需要加锁，<br>所以省掉了锁带来的开销，同时在编程以及问题查找时，也会方<br>便很多。</p>
+</blockquote>
+<blockquote>
+<p>其次，采用独立的进程，可以让互相之间不会影响，一个进程<br>退出后，其它进程还在工作，服务不会中断，master进程则很快启<br>动新的worker进程。当然，worker进程的异常退出，肯定是程序有<br>bug了，异常退出，会导致当前worker上的所有请求失败，不过不<br>会影响到所有请求，所以降低了风险。</p>
+</blockquote>
+<h2 id="需要设置多少个worker"><a href="#需要设置多少个worker" class="headerlink" title="需要设置多少个worker"></a>需要设置多少个worker</h2><blockquote>
+<p>Nginx 同redis类似都采用了io多路复用机制，每个<br>worker都是一个独立的进程，但每个进程里只有一个主线<br>程，通过异步非阻塞的方式来处理请求， 即使是千上万个<br>请求也不在话下。每个worker的线程可以把一个cpu的性<br>能发挥到极致。</p>
+</blockquote>
+<blockquote>
+<p>所以worker数和服务器的cpu数相等是最为适宜的。设<br>少了会浪费cpu，设多了会造成cpu频繁切换上下文带来的<br>损耗。</p>
+</blockquote>
+<h2 id="连接数worker-connection"><a href="#连接数worker-connection" class="headerlink" title="连接数worker_connection"></a>连接数worker_connection</h2><p>最大并发数的算法：</p>
+<pre><code>静态资源：链接数*worker数量/2
+动态资源：链接数*worker数量/4</code></pre><h2 id="nginx配置详情"><a href="#nginx配置详情" class="headerlink" title="nginx配置详情"></a>nginx配置详情</h2><pre><code>#安全问题，建议用nobody,不要用root.
+#user  nobody;
+
+#worker数和服务器的cpu数相等是最为适宜
+worker_processes  2;
+
+#work绑定cpu(4 work绑定4cpu)
+worker_cpu_affinity 0001 0010 0100 1000
+
+#work绑定cpu (4 work绑定8cpu中的4个) 。
+worker_cpu_affinity 0000001 00000010 00000100 00001000  
+
+
+
+#error_log path(存放路径) level(日志等级)path表示日志路径，level表示日志等级，
+#具体如下：[ debug | info | notice | warn | error | crit ]
+#从左至右，日志详细程度逐级递减，即debug最详细，crit最少，默认为crit。 
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    #这个值是表示每个worker进程所能建立连接的最大值，所以，一个nginx能建立的最大连接数，应该是worker_connections * worker_processes。
+    #当然，这里说的是最大连接数，对于HTTP请求本地资源来说，能够支持的最大并发数量是worker_connections * worker_processes，
+    #如果是支持http1.1的浏览器每次访问要占两个连接，
+    #所以普通的静态访问最大并发数是： worker_connections * worker_processes /2，
+    #而如果是HTTP作为反向代理来说，最大并发数量应该是worker_connections * worker_processes/4。
+    #因为作为反向代理服务器，每个并发会建立与客户端的连接和与后端服务的连接，会占用两个连接。
+
+    worker_connections  1024;  
+
+    #这个值是表示nginx要支持哪种多路io复用。
+    #一般的Linux选择epoll, 如果是(*BSD)系列的Linux使用kquene。
+    #windows版本的nginx不支持多路IO复用，这个值不用配。
+    use epoll;
+
+    # 当一个worker抢占到一个链接时，是否尽可能的让其获得更多的连接,默认是off 。
+    multi_accept on;
+
+    # 默认是on ,开启nginx的抢占锁机制。
+    accept_mutex  on;
+}
+
+
+http {
+    #当web服务器收到静态的资源文件请求时，依据请求文件的后缀名在服务器的MIME配置文件中找到对应的MIME Type，再根据MIME Type设置HTTP Response的Content-Type，然后浏览器根据Content-Type的值处理文件。
+
+    include       mime.types;
+
+    #如果 不能从mime.types找到映射的话，用以下作为默认值
+    default_type  application/octet-stream;
+
+
+
+     #日志位置
+     access_log  logs/host.access.log  main;
+
+     #一条典型的accesslog：
+     #101.226.166.254 - - [21/Oct/2013:20:34:28 +0800] &quot;GET /movie_cat.php?year=2013 HTTP/1.1&quot; 200 5209 &quot;http://www.baidu.com&quot; &quot;Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; MDDR; .NET4.0C; .NET4.0E; .NET CLR 1.1.4322; Tablet PC 2.0); 360Spider&quot;
+
+     #1）101.226.166.254:(用户IP)
+     #2）[21/Oct/2013:20:34:28 +0800]：(访问时间) 
+     #3）GET：http请求方式，有GET和POST两种
+     #4）/movie_cat.php?year=2013：当前访问的网页是动态网页，movie_cat.php即请求的后台接口，year=2013为具体接口的参数
+     #5）200：服务状态，200表示正常，常见的还有，301永久重定向、4XX表示请求出错、5XX服务器内部错误
+     #6）5209：传送字节数为5209，单位为byte
+     #7）&quot;http://www.baidu.com&quot;：refer:即当前页面的上一个网页
+     #8）&quot;Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; #.NET CLR 3.0.30729; Media Center PC 6.0; MDDR; .NET4.0C; .NET4.0E; .NET CLR 1.1.4322; Tablet PC 2.0); 360Spider&quot;： agent字段：通常用来记录操作系统、浏览器版本、浏览器内核等信息
+
+    log_format  main  &apos;$remote_addr - $remote_user [$time_local] &quot;$request&quot; &apos;
+                       &apos;$status $body_bytes_sent &quot;$http_referer&quot; &apos;
+                      &apos;&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;&apos;;
+
+
+
+    #开启从磁盘直接到网络的文件传输，适用于有大文件上传下载的情况，提高IO效率。
+    sendfile        on;
+
+
+    #一个请求完成之后还要保持连接多久, 默认为0，表示完成请求后直接关闭连接。
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+
+
+    #开启或者关闭gzip模块
+    #gzip  on ;
+
+    #设置允许压缩的页面最小字节数，页面字节数从header头中的Content-Length中进行获取。
+    #gzip_min_lenth 1k;
+
+    # gzip压缩比，1 压缩比最小处理速度最快，9 压缩比最大但处理最慢（传输快但比较消耗cpu）
+    #gzip_comp_level 4;
+
+    #匹配MIME类型进行压缩，（无论是否指定）&quot;text/html&quot;类型总是会被压缩的。
+    #gzip_types types text/plain text/css application/json  application/x-javascript text/xml  
+
+
+
+    #动静分离
+    #服务器端静态资源缓存，最大缓存到内存中的文件，不活跃期限
+    open_file_cache max=655350 inactive=20s;   
+
+    #活跃期限内最少使用的次数，否则视为不活跃。
+    open_file_cache_min_uses 2;
+
+    #验证缓存是否活跃的时间间隔
+    open_file_cache_valid 30s;
+
+
+
+    upstream myserver{
+
+    # 1、轮询（默认）
+    # 每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。
+    # 2、指定权重
+    # 指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况。
+    #3、IP绑定 ip_hash
+    # 每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session的问题。
+    #4、备机方式 backup
+    # 正常情况不访问设定为backup的备机，只有当所有非备机全都宕机的情况下，服务才会进备机。
+    #5、fair（第三方）
+    #按后端服务器的响应时间来分配请求，响应时间短的优先分配。   
+    #6、url_hash（第三方）
+    #按访问url的hash结果来分配请求，使每个url定向到同一个后端服务器，后端服务器为缓存时比较有效。
+
+
+      # ip_hash;
+             server 192.168.161.132:8080 weight=1;
+             server 192.168.161.132:8081 weight=1;
+
+      #fair
+
+      #hash $request_uri
+      #hash_method crc32
+
+      }
+
+    server {
+        #监听端口号
+        listen       80;
+
+        #服务名
+        server_name  192.168.161.130;
+
+        #字符集
+        #charset utf-8;
+
+
+
+
+    #location [=|~|~*|^~] /uri/ { … }   
+    # = 精确匹配
+    # ~ 正则匹配，区分大小写
+    # ~* 正则匹配，不区分大小写
+    # ^~  关闭正则匹配
+
+    #匹配原则：
+
+    # 1、所有匹配分两个阶段，第一个叫普通匹配，第二个叫正则匹配。
+    # 2、普通匹配，首先通过“=”来匹配完全精确的location
+        #   2.1、 如果没有精确匹配到， 那么按照最大前缀匹配的原则，来匹配location
+        #   2.2、 如果匹配到的location有^~,则以此location为匹配最终结果，如果没有那么会把匹配的结果暂存，继续进行正则匹配。
+        # 3、正则匹配，依次从上到下匹配前缀是~或~*的location, 一旦匹配成功一次，则立刻以此location为准，不再向下继续进行正则匹配。
+        # 4、如果正则匹配都不成功，则继续使用之前暂存的普通匹配成功的location.
+
+
+        location / {   # 匹配任何查询，因为所有请求都已 / 开头。但是正则表达式规则和长的块规则将被优先和查询匹配。
+
+        #定义服务器的默认网站根目录位置
+            root   html;
+
+        #默认访问首页索引文件的名称
+        index  index.html index.htm;
+
+        #反向代理路径
+            proxy_pass http://myserver;
+
+        #反向代理的超时时间
+            proxy_connect_timeout 10;
+
+            proxy_redirect default;       
+
+         }
+
+         location  /images/ {    
+        root images ;
+     }
+
+     location ^~ /images/jpg/ {  # 匹配任何已 /images/jpg/ 开头的任何查询并且停止搜索。任何正则表达式将不会被测试。 
+        root images/jpg/ ;
+
+
+     }
+         location ~*.(gif|jpg|jpeg)$ { 
+
+          #所有静态文件直接读取硬盘
+              root pic ;
+
+          #expires定义用户浏览器缓存的时间为3天，如果静态页面不常更新，可以设置更长，这样可以节省带宽和缓解服务器的压力
+              expires 3d; #缓存3天
+         }
+
+
+        #error_page  404              /404.html;
+
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+
+    }
+
+
+
+}</code></pre>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/05/%E5%B7%A5%E4%BD%9C%E7%AC%94%E8%AE%B0/" rel="prev" title="工作笔记">
+      <i class="fa fa-chevron-left"></i> 工作笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/06/mysql/" rel="next" title="mysql">
+      mysql <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">石玉龙</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
