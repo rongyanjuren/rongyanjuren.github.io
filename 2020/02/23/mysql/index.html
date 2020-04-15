@@ -41,8 +41,9 @@
 <meta property="og:image" content="https://person0311.oss-cn-beijing.aliyuncs.com/666.png">
 <meta property="og:image" content="https://person0311.oss-cn-beijing.aliyuncs.com/777.png">
 <meta property="og:image" content="https://person0311.oss-cn-beijing.aliyuncs.com/mysql%E7%94%A8mycat%E5%88%86%E5%BA%93%E9%85%8D%E7%BD%AE.png">
+<meta property="og:image" content="https://person0311.oss-cn-beijing.aliyuncs.com/%E5%9B%BE%E7%89%87.bmp">
 <meta property="article:published_time" content="2020-02-23T14:55:10.000Z">
-<meta property="article:modified_time" content="2020-04-14T15:26:43.947Z">
+<meta property="article:modified_time" content="2020-04-15T02:45:47.130Z">
 <meta property="article:author" content="石玉龙">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://person0311.oss-cn-beijing.aliyuncs.com/a%E3%80%81MySql%E6%9E%B6%E6%9E%841.png">
@@ -215,7 +216,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-04-14 23:26:43" itemprop="dateModified" datetime="2020-04-14T23:26:43+08:00">2020-04-14</time>
+                <time title="修改时间：2020-04-15 10:45:47" itemprop="dateModified" datetime="2020-04-15T10:45:47+08:00">2020-04-15</time>
               </span>
 
           
@@ -442,6 +443,99 @@ mysql -umycat -p123456 -h 192.168.100.130 -P8066</code></pre><h2 id="读写分�
 4. balance=&quot;3&quot;，所有读请求随机的分发到 readhost 执行，writerHost 不负担读压力
 重新启动mycat    ./mycat console 
 需要先搭主从复制，之后才能搭读写分离</code></pre><h2 id="分库"><a href="#分库" class="headerlink" title="  分库"></a>  分库</h2><p>  mysql的瓶颈为五千万行，达到瓶颈需要分库，分到两个机器就不能join关联查询，分库时，数据库得重新创建，不能再有数据的库上分库<br>  将order190311分库的例子<br>  1、修改配置<br>  <img src="https://person0311.oss-cn-beijing.aliyuncs.com/mysql%E7%94%A8mycat%E5%88%86%E5%BA%93%E9%85%8D%E7%BD%AE.png" alt=""><br>  2、创建order190311库<br>  3、启动mycat</p>
+<h2 id="分表"><a href="#分表" class="headerlink" title="  分表"></a>  分表</h2><p>  eg：将orders表分为两个表</p>
+<p>  1、将mycat服务停止</p>
+<p>  2、 vim schema.xml</p>
+<pre><code>&lt;schema name=&quot;TESTDB&quot; checkSQLschema=&quot;false&quot; sqlMaxLimit=&quot;100&quot; dataNode=&quot;dn1&quot;&gt;
+     &lt;table name=&quot;customer&quot; dataNode=&quot;dn2&quot; &gt;&lt;/table&gt;
+     &lt;table name=&quot;orders&quot; dataNode=&quot;dn1,dn2&quot;  rule=&quot;mod_rule&quot; &gt;&lt;/table&gt;&lt;!--本行为新增，mod_rule为自定义值--&gt;
+&lt;/schema&gt;</code></pre><p>  3、vim rule.xml</p>
+<pre><code>&lt;tableRule name=&quot;mod_rule&quot;&gt;
+     &lt;rule&gt;
+          &lt;columns&gt;customer_id&lt;/columns&gt;&lt;!--分表的字段--&gt;
+          &lt;algorithm&gt;mod-long&lt;/algorithm&gt;&lt;!--分表的算法，此处为hash--&gt;
+     &lt;/rule&gt;
+&lt;/tableRule&gt;
+
+&lt;function name=&quot;mod-long&quot; class=&quot;io.mycat.route.function.PartitionByMod&quot;&gt;
+    &lt;!-- how many data nodes --&gt;
+    &lt;property name=&quot;count&quot;&gt;2&lt;/property&gt;&lt;!--数据库的数量--&gt;
+&lt;/function&gt;</code></pre><p>   4、创建表（分表的前提是表没有数据，通过mycat来创建数据）<br>   5、创建数据 （创建数据时需要将字段标清楚）</p>
+<p>   eg：将订单详情表分表 ER策略        vim schema.xml</p>
+<pre><code> &lt;schema name=&quot;TESTDB&quot; checkSQLschema=&quot;false&quot; sqlMaxLimit=&quot;100&quot; dataNode=&quot;dn1&quot;&gt;
+        &lt;table name=&quot;customer&quot; dataNode=&quot;dn2&quot; &gt;&lt;/table&gt;
+        &lt;table name=&quot;orders&quot; dataNode=&quot;dn1,dn2&quot;  rule=&quot;mod_rule&quot; &gt;
+            &lt;childTable name=&quot;orders_detail&quot; primaryKey=&quot;id&quot; joinKey=&quot;order_id&quot; parentKey=&quot;id&quot; /&gt;&lt;!-- 此行为新加行 --&gt;
+        &lt;/table&gt;
+        &lt;table name=&quot;dict_status&quot; dataNode=&quot;dn1,dn2&quot; type=&quot;global&quot; &gt;&lt;/table&gt;
+&lt;/schema&gt;</code></pre><p>   eg：全局表的配置</p>
+<pre><code> &lt;schema name=&quot;TESTDB&quot; checkSQLschema=&quot;false&quot; sqlMaxLimit=&quot;100&quot; dataNode=&quot;dn1&quot;&gt;
+        &lt;table name=&quot;customer&quot; dataNode=&quot;dn2&quot; &gt;&lt;/table&gt;
+        &lt;table name=&quot;orders&quot; dataNode=&quot;dn1,dn2&quot;  rule=&quot;mod_rule&quot; &gt;&lt;/table&gt;
+         &lt;table name=&quot;dict_order_type&quot; dataNode=&quot;dn1,dn2&quot; type=&quot;global&quot; &gt;&lt;/table&gt;&lt;!-- 此行为新加行 --&gt;
+&lt;/schema&gt;</code></pre><p>   全局序列（主键生成策略）<br>   mycat提供4种</p>
+<p>   1、本地文件 ，在mycat服务器上保存文件，每次插入数据后都自增1，缺点是当mycat服务器挂掉后，备机继续从1开始，抗风险能力差，不推荐此方式<br>   2、时间戳方式 ，时间戳18位，比较长<br>   3、数据库方式 </p>
+<pre><code>    利用数据库一个表 来进行计数累加。
+    但是并不是每次生成序列都读写数据库，这样效率太低
+    mycat会预加载一部分号段到mycat的内存中，这样大部分读写序列都是在内存中完成的。
+    如果内存中的号段用完了 mycat会再向数据库要一次。
+    问：那如果mycat崩溃了 ，那内存中的序列岂不是都没了？
+    是的。如果是这样，那么mycat启动后会向数据库申请新的号段，原有号段会弃用。
+    也就是说如果mycat重启，那么损失是当前的号段没用完的号码，但是不会因此出现主键重复。
+
+
+    1.建库序列脚本
+    CREATE TABLE MYCAT_SEQUENCE (NAME VARCHAR(50) NOT NULL,current_value INT NOT
+    NULL,increment INT NOT NULL DEFAULT 100, PRIMARY KEY(NAME)) ENGINE=INNODB;
+
+
+
+
+DELIMITER $$
+
+CREATE FUNCTION mycat_seq_currval(seq_name VARCHAR(50)) RETURNS VARCHAR(64)
+DETERMINISTIC  
+BEGIN
+DECLARE retval VARCHAR(64);
+SET retval=&quot;-999999999,null&quot;;
+SELECT CONCAT(CAST(current_value AS CHAR),&quot;,&quot;,CAST(increment AS CHAR)) INTO retval FROM
+MYCAT_SEQUENCE WHERE NAME = seq_name;
+RETURN retval;
+END $$
+DELIMITER;
+
+DELIMITER $$
+CREATE FUNCTION mycat_seq_setval(seq_name VARCHAR(50),VALUE INTEGER) RETURNS VARCHAR(64)
+DETERMINISTIC
+BEGIN
+UPDATE MYCAT_SEQUENCE
+SET current_value = VALUE
+WHERE NAME = seq_name;
+RETURN mycat_seq_currval(seq_name);
+END $$
+DELIMITER ;
+
+DELIMITER $$
+CREATE FUNCTION mycat_seq_nextval(seq_name VARCHAR(50)) RETURNS VARCHAR(64) 
+DETERMINISTIC
+BEGIN
+UPDATE MYCAT_SEQUENCE
+SET current_value = current_value + increment WHERE NAME = seq_name;
+RETURN mycat_seq_currval(seq_name);
+END $$
+DELIMITER;
+
+
+SELECT * FROM MYCAT_SEQUENCE
+
+TRUNCATE TABLE MYCAT_SEQUENCE
+
+##增加要用的序列
+INSERT INTO MYCAT_SEQUENCE(NAME,current_value,increment) VALUES (&apos;ORDERS&apos;, 400000,
+100);
+2.vim sequence_db_conf.properties  查看orders表在哪个节点下边
+  OPDERS=dn1  
+3. vim server.xml</code></pre><p>   <img src="https://person0311.oss-cn-beijing.aliyuncs.com/%E5%9B%BE%E7%89%87.bmp" alt=""><br>   0为本地文件，1为数据库方式，2为时间戳方式</p>
 
     </div>
 
