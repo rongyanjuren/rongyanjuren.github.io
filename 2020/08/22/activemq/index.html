@@ -20,15 +20,15 @@
     var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"remove","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":true,"transition":{"post_block":"fadeIn","post_header":"fadeIn","post_body":"fadeIn","coll_header":"fadeIn","sidebar":"whirlIn"}}};
   </script>
 
-  <meta name="description" content="如何保障消息中间件100%消息投递成功？如何保持幂等性？">
+  <meta name="description" content="如何保障消息中间件100%消息投递成功？如何保持幂等性？ 优点： 1、异步 2、并行 3、解耦 4、排队弊端：不确定性和延迟解决方案：最终一致性，换会时间，提高效率！ activemq两个重要的端口，一个是提供消息队列的默认端口：61616 、另一个是控制台端口8161 使用方法 1、导依赖 12345&lt;dependency&gt;   &lt;groupId&gt;org.apache.a">
 <meta property="og:type" content="article">
 <meta property="og:title" content="activemq">
 <meta property="og:url" content="http://yoursite.com/2020/08/22/activemq/index.html">
 <meta property="og:site_name" content="石玉龙的博客">
-<meta property="og:description" content="如何保障消息中间件100%消息投递成功？如何保持幂等性？">
+<meta property="og:description" content="如何保障消息中间件100%消息投递成功？如何保持幂等性？ 优点： 1、异步 2、并行 3、解耦 4、排队弊端：不确定性和延迟解决方案：最终一致性，换会时间，提高效率！ activemq两个重要的端口，一个是提供消息队列的默认端口：61616 、另一个是控制台端口8161 使用方法 1、导依赖 12345&lt;dependency&gt;   &lt;groupId&gt;org.apache.a">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-08-22T10:14:55.000Z">
-<meta property="article:modified_time" content="2020-08-22T10:15:11.565Z">
+<meta property="article:modified_time" content="2020-08-23T03:24:27.507Z">
 <meta property="article:author" content="石玉龙">
 <meta name="twitter:card" content="summary">
 
@@ -192,10 +192,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-08-22 18:14:55 / 修改时间：18:15:11" itemprop="dateCreated datePublished" datetime="2020-08-22T18:14:55+08:00">2020-08-22</time>
+              <time title="创建时间：2020-08-22 18:14:55" itemprop="dateCreated datePublished" datetime="2020-08-22T18:14:55+08:00">2020-08-22</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-08-23 11:24:27" itemprop="dateModified" datetime="2020-08-23T11:24:27+08:00">2020-08-23</time>
+              </span>
 
           
 
@@ -209,7 +215,29 @@
 
       
         <p><a href="https://mp.weixin.qq.com/s?__biz=MzA4NzQ0Njc4Ng==&mid=2247485253&idx=2&sn=06a8a0dc6a7ab1f741db257f48f403a2&chksm=90380328a74f8a3eebf3066d17b748895049029f5ecd09482b6905024360c7517be8384a7bf1&mpshare=1&scene=1&srcid=0819k6v8HgVSaRjpGIxpB11M&sharer_sharetime=1597808269829&sharer_shareid=60088dd9bf8edf3b2c1ac06200e4920d&key=5e7686a5aca6468bcfb9d6b26b273926cf4511922649dafc3b335cd46d1e36b8b52c2678a7ee5630088ec503be6462841cae44740b197d57ce9e42e5366fb83f437d1d9b61984d88a47082008776bfe497323f64a29795afd0d7dd93b51ff1fb73538950f03ea38e38ccc6df7ef65fa334c7b9bcd8a8387ae3e2de66ac756b74&ascene=1&uin=MjQzOTMyMjI4Mg%3D%3D&devicetype=Windows+10+x64&version=62090070&lang=zh_CN&exportkey=AYckDqV7KVRXH%2B0zVFlmtSg%3D&pass_ticket=%2FOgQ426y11aur4hMMDuwa6GqXBWMek2Vwy6XvqVhNFrXmWJUfy6cOjsf%2BFv77iF%2B" target="_blank" rel="noopener">如何保障消息中间件100%消息投递成功？如何保持幂等性？</a></p>
+<p>优点：</p>
+<pre><code>1、异步
+2、并行
+3、解耦
+4、排队</code></pre><p>弊端：不确定性和延迟<br>解决方案：最终一致性，换会时间，提高效率！</p>
+<p>activemq两个重要的端口，一个是提供消息队列的默认端口：61616 、另一个是控制台端口8161</p>
+<p>使用方法</p>
+<p>1、导依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.activemq<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>activemq-pool<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.15.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
+<p>2、生产端demo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProducerTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> JMSException </span>&#123;</span><br><span class="line">        <span class="comment">// 创建连接工厂</span></span><br><span class="line">        ConnectionFactory connectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(<span class="string">"tcp://192.168.67.201:61616"</span>);</span><br><span class="line">        Connection connection = connectionFactory.createConnection();</span><br><span class="line">        connection.start();</span><br><span class="line">        <span class="comment">// 创建session 第一个参数表示是否支持事务，false时，第二个参数Session.AUTO_ACKNOWLEDGE，Session.CLIENT_ACKNOWLEDGE，DUPS_OK_ACKNOWLEDGE其中一个</span></span><br><span class="line">        <span class="comment">// 第一个参数设置为true时，第二个参数可以忽略 服务器设置为SESSION_TRANSACTED</span></span><br><span class="line">        Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">        <span class="comment">// 创建队列</span></span><br><span class="line">        Queue queue = session.createQueue(<span class="string">"hello"</span>);</span><br><span class="line"></span><br><span class="line">        MessageProducer producer = session.createProducer(queue);</span><br><span class="line">        <span class="comment">// 创建消息对象</span></span><br><span class="line">        ActiveMQTextMessage activeMQTextMessage = <span class="keyword">new</span> ActiveMQTextMessage();</span><br><span class="line">        activeMQTextMessage.setText(<span class="string">"hello ActiveMq!"</span>);</span><br><span class="line">        <span class="comment">// 发送消息</span></span><br><span class="line">        producer.send(activeMQTextMessage);</span><br><span class="line">        <span class="comment">//如果开启事务，则需要session.commit();</span></span><br><span class="line">         <span class="comment">//session.commit();</span></span><br><span class="line">        producer.close();</span><br><span class="line">        connection.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<pre><code>Number Of Pending Messages 等待消费的消息 这个是当前未出队列的数量。可以理解为总接收数-总出队列数
+Number Of Consumers  消费者 这个是消费者端的消费者数量
+Messages Enqueued 进入队列的消息  进入队列的总数量,包括出队列的。 这个数量只增不减
+Messages Dequeued 出了队列的消息  可以理解为是消费者消费掉的数量
+总结：
+当有一个消息进入这个队列时，等待消费的消息是1，进入队列的消息是1。
+当消息消费后，等待消费的消息是0，进入队列的消息是1，出队列的消息是1.
+在来一条消息时，等待消费的消息是1，进入队列的消息就是2.</code></pre><p>3、消费端demo</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConsumerTest</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> JMSException </span>&#123;</span><br><span class="line">        ActiveMQConnectionFactory activeMQConnectionFactory = <span class="keyword">new</span> ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER, ActiveMQConnection.DEFAULT_PASSWORD, <span class="string">"tcp://192.168.67.201:61616"</span>);</span><br><span class="line">        <span class="comment">// 创建连接</span></span><br><span class="line">        Connection connection = activeMQConnectionFactory.createConnection();</span><br><span class="line">        connection.start();</span><br><span class="line">        <span class="comment">// 创建会话</span></span><br><span class="line">        Session session = connection.createSession(<span class="keyword">false</span>, Session.AUTO_ACKNOWLEDGE);</span><br><span class="line">        <span class="comment">// 创建队列</span></span><br><span class="line">        Queue queue = session.createQueue(<span class="string">"hello"</span>);</span><br><span class="line">        <span class="comment">// 创建Consumer</span></span><br><span class="line">        MessageConsumer consumer = session.createConsumer(queue);</span><br><span class="line">        <span class="comment">// 接收消息</span></span><br><span class="line">        consumer.setMessageListener(<span class="keyword">new</span> MessageListener() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span><span class="params">(Message message)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 参数就是收到的消息</span></span><br><span class="line">                <span class="keyword">if</span> (message <span class="keyword">instanceof</span>  TextMessage)&#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        String text = ((TextMessage) message).getText();</span><br><span class="line">                        System.out.println(text+<span class="string">"接收的消息！"</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (JMSException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
     </div>
 
     
